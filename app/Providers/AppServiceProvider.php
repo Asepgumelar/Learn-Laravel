@@ -2,8 +2,9 @@
 
 namespace App\Providers;
 
+use Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
+use Laravel\Passport\Passport;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         //
+        Passport::ignoreMigrations();
     }
 
     /**
@@ -24,6 +26,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        Schema::defaultStringLength(191);
+        // Ide for developer
+        if ($this->app->environment() !== 'production') {
+            $this->app->register(IdeHelperServiceProvider::class);
+        }
+        if (!$this->app->runningInConsole()) {
+            $themes = 'default';
+            view()->share('app_site_title', config('app.name'));
+            view()->share('app_site_theme', $themes);
+            $viewThemes = 'frontend.themes.' . $themes;
+            view()->share('view_themes', $viewThemes);
+        }
     }
 }
